@@ -2,7 +2,7 @@
 #
 # Name:  John Kautzner
 # Collaborators:  None
-# Time:  0:00
+# Time:  1:00
 
 
 
@@ -14,6 +14,12 @@ from ps7 import *
 #
 # PROBLEM 1
 #
+
+class NoChildException(Exception):
+    """
+
+    """
+
 class ResistantVirus(SimpleVirus):
 
     """
@@ -40,9 +46,10 @@ class ResistantVirus(SimpleVirus):
 
         """
 
-
-        # TODO
-
+        self.maxBirthProb = maxBirthProb
+        self.clearProb = clearProb
+        self.resistances = resistances
+        self.mutProb = mutProb
 
 
     def isResistantTo(self, drug):
@@ -57,7 +64,7 @@ class ResistantVirus(SimpleVirus):
         otherwise.
         """
 
-        # TODO
+        return self.resistances[drug]
 
 
     def reproduce(self, popDensity, activeDrugs):
@@ -98,9 +105,22 @@ class ResistantVirus(SimpleVirus):
         returns: a new instance of the ResistantVirus class representing the
         offspring of this virus particle. The child should have the same
         maxBirthProb and clearProb values as this virus. Raises a
-        NoChildException if this virus particle does not reproduce.         
+        NoChildException if this virus particle does not reproduce.
         """
-        # TODO
+
+        for d in activeDrugs:
+            if self.resistances[d] == False:
+                raise NoChildException
+
+        if random.random() < self.maxBirthProb * (1-popDensity):
+            newResistances = {}
+            for r in self.resistances:
+                if random.random() < 1 - self.mutProb:
+                    newResistances[r] = self.resistances[r]
+                else:
+                    newResistances[r] = not self.resistance[r]
+            return ResistantVirus(self.maxBirthProb, self.clearProb, newResistances, self.mutProb)
+
 
             
 
