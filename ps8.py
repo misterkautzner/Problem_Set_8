@@ -2,7 +2,7 @@
 #
 # Name:  John Kautzner
 # Collaborators:  None
-# Time:  2:00
+# Time:  3:00
 
 
 
@@ -181,8 +181,9 @@ class ResistantVirus(SimpleVirus):
                 if random.random() < 1 - self.mutProb:
                     newResistances[r] = self.resistances[r]
                 else:
-                    newResistances[r] = not self.resistance[r]
+                    newResistances[r] = not self.resistances[r]
             return ResistantVirus(self.maxBirthProb, self.clearProb, newResistances, self.mutProb)
+        raise NoChildException
 
 class SimplePatient(object):
 
@@ -348,6 +349,9 @@ class Patient(SimplePatient):
         for v in self.viruses:
             if not v.isResistantToAll(self.activeDrugs):
                 self.viruses.remove(v)
+            else:
+                if v.doesClear():
+                    self.viruses.remove(v)
 
         #2)
         popDensity = float(len(self.viruses))/float(self.maxPop)
@@ -379,7 +383,56 @@ def simulationWithDrug():
     total virus population vs. time and guttagonol-resistant virus population
     vs. time are plotted
     """
-    # TODO
+
+    maxBirthProb = .75
+    clearProb = 0
+    resistances = {'guttagonal': False}
+    mutProb = .1
+
+    total = [5]
+    g = [0]
+
+    badVirus = ResistantVirus(maxBirthProb, clearProb, resistances, mutProb)
+    viruses = [badVirus]*total[0]
+    maxPop = 10000
+
+    Bob = Patient(viruses, maxPop)
+
+    for i in range(300):
+        Bob.update()
+        gVirus = 0
+
+        for v in Bob.viruses:
+            if v.isResistantTo('guttagonal'):
+                gVirus += 1
+
+        g += [gVirus]
+        total += [len(Bob.viruses)]
+
+    Bob.addPrescription('guttagonal')
+
+    for i in range(300):
+        Bob.update()
+        gVirus = 0
+
+        for v in Bob.viruses:
+            if v.isResistantTo('guttagonal'):
+                gVirus += 1
+
+        g += [gVirus]
+        total += [len(Bob.viruses)]
+
+    pylab.title("Number of Viruses with Different Resistances to Guttagonal")
+    pylab.xlabel("Number of Timesteps")
+    pylab.ylabel("Number of Viruses")
+
+    pylab.plot(g, '-r', label = 'Resistant')
+    pylab.plot(total, '-b', label = 'Total')
+    pylab.legend(loc = 'lower right')
+    pylab.show()
+
+
+simulationWithDrug()
 
 
 
